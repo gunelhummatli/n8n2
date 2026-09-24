@@ -1,0 +1,127 @@
+{
+  "id": "instagramPostHttpRequest01",
+  "name": "Instagram Post (HTTP Request)",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Instagram Post",
+        "formDescription": "Şəkil linki və caption daxil edin",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "image_url",
+              "placeholder": "https://example.com/sekil.jpg",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "caption",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000001",
+      "name": "Form Trigger",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [-200, 0],
+      "webhookId": "d1000000-0000-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/IG_USER_ID/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "image_url",
+              "value": "={{ $json.image_url }}"
+            },
+            {
+              "name": "caption",
+              "value": "={{ $json.caption }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000002",
+      "name": "IG: Container Yarat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [40, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "META_HEADER_CRED",
+          "name": "Meta Graph Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "c1000000-0000-4000-8000-000000000003",
+      "name": "5 saniyə gözlə",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [280, 0],
+      "webhookId": "d1000000-0000-4000-8000-000000000003"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/IG_USER_ID/media_publish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "creation_id",
+              "value": "={{ $('IG: Container Yarat').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000004",
+      "name": "IG: Postu Yayımla",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "META_HEADER_CRED",
+          "name": "Meta Graph Bearer"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Form Trigger": {
+      "main": [[{ "node": "IG: Container Yarat", "type": "main", "index": 0 }]]
+    },
+    "IG: Container Yarat": {
+      "main": [[{ "node": "5 saniyə gözlə", "type": "main", "index": 0 }]]
+    },
+    "5 saniyə gözlə": {
+      "main": [[{ "node": "IG: Postu Yayımla", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {},
+  "tags": []
+}
